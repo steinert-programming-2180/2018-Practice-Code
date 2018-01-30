@@ -70,7 +70,7 @@ public class ScaleLights {
 				e.printStackTrace();
 			}
 			
-//			Imgproc.cvtColor(frame, hsv, Imgproc.COLOR_RGB2HSV);
+			Imgproc.cvtColor(frame, hsv, Imgproc.COLOR_RGB2HSV);
 			
 			Imgproc.medianBlur(hsv, medianBlur, 11);
 			
