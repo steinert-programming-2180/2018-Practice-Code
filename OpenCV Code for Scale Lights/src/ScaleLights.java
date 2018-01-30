@@ -56,7 +56,7 @@ public class ScaleLights {
 		
 		Scalar white = new Scalar(255, 255, 255);
 		
-		hsv = Imgcodecs.imread("ledred.png");
+// 		hsv = Imgcodecs.imread("ledred.png");
 		
 		while (true) {
 			
