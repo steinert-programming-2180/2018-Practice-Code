@@ -31,21 +31,21 @@ public class ScaleLights {
 		System.load("C:/Users/Steinert Robotics/Downloads/opencv/build/java/x64/opencv_java340.dll");
 		
 		VideoCapture camera = new VideoCapture(0);
+		
 		Mat frame = new Mat();
 		Mat hsv = new Mat();
 		Mat medianBlur = new Mat();
-		
 		Mat threshold = new Mat();
-		
 		Mat erode = new Mat();
-		
 		Mat dilate = new Mat();
-		
 		Mat element = new Mat();
+//		Mat dest = new Mat();
 		
-		Mat dest = new Mat();
+		Size s = new Size();
 		
 		double morphSize = 2;
+		
+		Moments p = new Moments();
 		
 		// uncomment when using red LED light
 		Scalar lowerRed = new Scalar(95, 0, 230); // 2nd parameter (saturation) doesn't matter; old V: 220
@@ -54,9 +54,7 @@ public class ScaleLights {
 		List<MatOfPoint> contours = new ArrayList<>();
 		List<Moments> mu = new ArrayList<>();
 		
-		Scalar white = new Scalar(255, 255, 255);
-		
-// 		hsv = Imgcodecs.imread("ledred.png");
+//		hsv = Imgcodecs.imread("ledred.png");
 		
 		while (true) {
 			
@@ -84,30 +82,41 @@ public class ScaleLights {
 			
 			Core.inRange(dilate, lowerRed, upperRed, threshold);
 			
-			dest = Mat.zeros(threshold.size(), CvType.CV_8UC3);
+//			dest = Mat.zeros(threshold.size(), CvType.CV_8UC3);
 			
 			// Find contours
 			Imgproc.findContours(threshold, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
 			// Draw contours in dest Mat
-			Imgproc.drawContours(dilate, contours, -1, white);
-			
-//			Imgproc.adaptiveThreshold(gaussian, threshold, upperRed, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 11, 40);
-			
+			Imgproc.drawContours(dilate, contours, -1, new Scalar(255, 255, 255));
+						
 			for (int i = 0; i < contours.size(); i++) {
 		        mu.add(i, Imgproc.moments(contours.get(i), false));
-		        Moments p = mu.get(i);
+		        p = mu.get(i);
 		        int x = (int) (p.get_m10() / p.get_m00());
 		        int y = (int) (p.get_m01() / p.get_m00());
-		        Imgproc.circle(dilate, new Point(x, y), 4, new Scalar(255,49,0,255));
+		        Imgproc.circle(frame, new Point(x, y), 4, new Scalar(255,49,0,255));
 		    }
 			
-			displayImage(Mat2BufferedImage(dilate), dilate);
+			s = frame.size();
+			
+			Imgproc.line(frame, new Point(0, s.height / 2), new Point(s.width, s.height / 2), new Scalar(255, 255, 255), 2);
+			
+			if (mu.size() != 0) { // check if nothing is detected
+				if ((mu.get(0).get_m01() / mu.get(0).get_m00()) > s.height / 2) {
+					Imgproc.putText(frame, "Below line", new Point(10, s.height - 50), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0, 255), 4);
+				} else {
+					Imgproc.putText(frame, "Above line", new Point(10, s.height - 50), Core.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 4);
+				}
+			}	
+			
+			displayImage(Mat2BufferedImage(frame), dilate);
 			
 			
 //			displayImage(Mat2BufferedImage(frame));
 			
-			contours.clear();
+			contours.clear(); // delete all current contours to prepare for next iteration
+			mu.clear(); // delete all current moments to prepare for next iteration
 		}
 	}
 	
