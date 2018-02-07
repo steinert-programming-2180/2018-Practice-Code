@@ -41,7 +41,7 @@ public class Robot extends TimedRobot {
 		
 		// PID gains. Try tuning these through the web dashboard
 		kP = 0.1; // tune first.
-		kI = 0.0; // tune last. start with 0.01*kP
+		kI = 0.0; // tune last. start with 0.01*kP. You can tune this further using something called an I-zone
 		kD = 0.0; // tune second. start with 10*kP to 100*kP
 		
 		chooser = new SendableChooser<>();
