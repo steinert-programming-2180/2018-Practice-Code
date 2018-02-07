@@ -112,7 +112,7 @@ public class Robot extends TimedRobot {
 		
 		autonSpeed = 1.0;
 		numRevs = 10;
-		targetPositionRotations = autonSpeed * numRevs * 1440; // 1440 ticks per revolution, amassed to 10 revolutions, scaled to desired speed
+		targetPositionRotations = (numRevs * 1440) / autonSpeed; // 1440 ticks per revolution, amassed to 10 revolutions, scaled to desired speed
 	}
 
 	@Override
