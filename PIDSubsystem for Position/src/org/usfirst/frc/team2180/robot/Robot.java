@@ -40,7 +40,7 @@ public class Robot extends TimedRobot {
 	public void robotInit() {
 		
 		// PID gains. Try tuning these through the web dashboard
-		kP = 0.1; // tune first.
+		kP = 0.462; // tune first.
 		kI = 0.0; // tune last. start with 0.01*kP. You can tune this further using something called an I-zone
 		kD = 0.0; // tune second. start with 10*kP to 100*kP
 		
@@ -48,8 +48,8 @@ public class Robot extends TimedRobot {
 		chooser.addDefault("Default Auto", new ExampleCommand());
 		SmartDashboard.putData("Auto mode", chooser);
 		
-		sensorInPhase = true; // don't change these
-		motorInverted = false; // don't change these
+		sensorInPhase = true; // test this
+		motorInverted = false; // test this
 		
 		autoDrive = new Drivetrain();
 		
@@ -57,8 +57,8 @@ public class Robot extends TimedRobot {
 		talon2 = new WPI_TalonSRX(20);
 		talon3 = new WPI_TalonSRX(30);
 		
-		talon2.set(talon1.getDeviceID()); // a slave of talon1
-		talon3.set(talon1.getDeviceID()); // a slave of talon1
+		talon2.follow(talon1); // a slave of talon1
+		talon3.follow(talon1); // a slave of talon1
 		
 		// begin configuration
 		
@@ -118,7 +118,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void autonomousPeriodic() {
 		
-		talon1.set(ControlMode.Position, targetPositionRotations);
+		talon1.set(ControlMode.Position, 2880); // two revolutions
 		
 		Scheduler.getInstance().run();
 	}
