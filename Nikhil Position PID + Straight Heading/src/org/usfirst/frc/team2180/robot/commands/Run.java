@@ -10,5 +10,6 @@ public class Run extends CommandGroup {
     public Run(boolean isUsingCuriosity) {
     	addSequential(new RunForward(isUsingCuriosity));
 //    	addSequential(new RunBackward(isUsingCuriosity));
+    	addSequential(new Turn(90));
     }
 }

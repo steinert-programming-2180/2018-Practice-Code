@@ -10,6 +10,9 @@ package org.usfirst.frc.team2180.robot;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
+import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
@@ -25,26 +28,18 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 public class Robot extends TimedRobot {
-			
-
+		
 	Command autonomousCommand;
 	SendableChooser<Command> chooser;
-	
 	public static WPI_TalonSRX talon1, talon2, talon3;
-	
 	public static WPI_TalonSRX regTalon1, regTalon2, regTalon3;
-	
 	public static boolean sensorInPhase, motorInverted;
-	
-	public static double kP, kI, kD;
-	
 	public static double position;
-	
 	public static Joystick stick;
-	
 	public static boolean isUsingCuriosity;
-	
-	public static Gyro gyro;
+	public static ADXRS450_Gyro gyro;
+	public static PIDController gyroPID;
+	public static PIDOutput gyroPIDOutput;
 	
 	@Override
 	public void robotInit() {
@@ -52,7 +47,7 @@ public class Robot extends TimedRobot {
 		regTalon1 = new WPI_TalonSRX(11);
 		regTalon2 = new WPI_TalonSRX(22);
 		regTalon3 = new WPI_TalonSRX(33);
-		
+		 
 		regTalon2.follow(regTalon1);
 		regTalon3.follow(regTalon1);
 		
@@ -61,10 +56,10 @@ public class Robot extends TimedRobot {
 		chooser = new SendableChooser<>();
 		SmartDashboard.putData("Auto mode", chooser);
 		
-		setupDrivetrainPID();
-		
 		gyro = new ADXRS450_Gyro();
-			
+		
+		setupDrivetrainPID();
+		setupGyroPID();
 	}
 
 	@Override
@@ -99,7 +94,7 @@ public class Robot extends TimedRobot {
 		
 		SmartDashboard.putNumber("Position", talon1.getSelectedSensorPosition(0));
 		
-		SmartDashboard.putNumber("Error", 14400 - talon1.getSelectedSensorPosition(0));
+		SmartDashboard.putNumber("Error", Constants.autonTicks - talon1.getSelectedSensorPosition(0));
 		
 		Scheduler.getInstance().run();
 	}
@@ -117,9 +112,9 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 		
-		SmartDashboard.putNumber("Gyro factor", gyro.getAngle()*0.03);
+		SmartDashboard.putNumber("Gyro factor", gyro.getAngle()*Constants.gyroKP);
 		
-		regTalon1.set(0.3 - (gyro.getAngle()*0.03));
+		regTalon1.set(0.3 - (gyro.getAngle()*Constants.gyroKP));
 		
 		SmartDashboard.putNumber("Teleop Talon Speed", regTalon1.getMotorOutputPercent());
 		
@@ -137,10 +132,6 @@ public class Robot extends TimedRobot {
 	}
 	
 	public void setupDrivetrainPID() {
-		
-		kP = 10.0; // tune first.
-		kI = 0.00001; // tune last. start with 0.01*kP. You can tune this further using something called an I-zone
-		kD = 320.0; // tune second. start with 10*kP to 100*kP
 		
 		sensorInPhase = false; // don't change these
 		motorInverted = true; // don't change these
@@ -182,16 +173,28 @@ public class Robot extends TimedRobot {
 		talon1.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
 		talon1.setSensorPhase(sensorInPhase);
 		
-		talon1.configAllowableClosedloopError(0, 40, 10);
+		talon1.configAllowableClosedloopError(0, Constants.allowableAutonPositionError, 10);
 		
 		talon1.configNominalOutputForward(0, 10);
 		talon1.configNominalOutputReverse(0, 10);
-		talon1.configPeakOutputForward(0.3, 10);
-		talon1.configPeakOutputReverse(-0.3, 10);
+		talon1.configPeakOutputForward(Constants.autonSpeed, 10);
+		talon1.configPeakOutputReverse(-Constants.autonSpeed, 10);
 		
 		talon1.config_kF(0, 0.0, 10);
-		talon1.config_kP(0, kP, 10);
-		talon1.config_kI(0, kI, 10);
-		talon1.config_kD(0, kD, 10);
+		talon1.config_kP(0, Constants.kP, 10);
+		talon1.config_kI(0, Constants.kI, 10);
+		talon1.config_kD(0, Constants.kD, 10);
+	}
+	
+	public void setupGyroPID() {
+		gyroPIDOutput = new PIDOutput() {
+			public void pidWrite(double output) {
+				// an empty trick!
+			}
+		};
+		
+		gyroPID = new PIDController(Constants.gyroKP, Constants.gyroKI, Constants.gyroKD, gyro, gyroPIDOutput);
+		gyroPID.setContinuous();
+		gyroPID.setAbsoluteTolerance(Constants.allowableGyroError);
 	}
 }

@@ -1,5 +1,6 @@
 package org.usfirst.frc.team2180.robot.commands;
 
+import org.usfirst.frc.team2180.robot.Constants;
 import org.usfirst.frc.team2180.robot.Robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -36,7 +37,8 @@ public class RunForward extends Command {
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
     	SmartDashboard.putString("PID Status", "Forward");
-    	Robot.talon1.set(ControlMode.Position, 14400);
+    	Robot.talon1.set(ControlMode.Position, Constants.autonTicks);
+    	Robot.regTalon1.set(Constants.autonSpeed - (Robot.gyro.getAngle() * Constants.gyroKP));
     }
 
     // Make this return true when this Command no longer needs to run execute()
@@ -49,7 +51,7 @@ public class RunForward extends Command {
 
     // Called once after isFinished returns true
     protected void end() {
-    	
+    	Robot.regTalon1.set(0.0);
     }
 
     // Called when another command which requires one or more of the same
