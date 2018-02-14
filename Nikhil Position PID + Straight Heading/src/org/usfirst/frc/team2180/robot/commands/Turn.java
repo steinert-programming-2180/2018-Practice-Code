@@ -25,7 +25,7 @@ public class Turn extends Command {
 
     protected void initialize() {
     	// No need to reset the Gyro. you don't want error from the previous command to carry over to this one.
-        gyroPID.setSetpoint(90);
+        gyroPID.setSetpoint(angle);
     }
 
     protected void execute() {
