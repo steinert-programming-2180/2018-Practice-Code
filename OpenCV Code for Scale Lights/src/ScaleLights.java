@@ -71,21 +71,14 @@ public class ScaleLights {
 					camera.read(frame);
 				}
 				
-				Imgproc.cvtColor(frame, hsv, Imgproc.COLOR_RGB2HSV);
-				
-				Imgproc.medianBlur(hsv, medianBlur, 11);
-				
+				Imgproc.cvtColor(frame, hsv, Imgproc.COLOR_RGB2HSV);				
+				Imgproc.medianBlur(hsv, medianBlur, 11);				
 				element = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(4*morphSize + 1, (2*morphSize)+1), new Point(morphSize, morphSize));
-				
 				Imgproc.erode(medianBlur, erode, element);
-				Imgproc.dilate(erode, dilate, element);
-				
+				Imgproc.dilate(erode, dilate, element);				
 				Imgproc.erode(dilate, erode, element);
 				Imgproc.dilate(erode, dilate, element);
-				
 				Core.inRange(dilate, lowerRed, upperRed, threshold);
-				
-//				dest = Mat.zeros(threshold.size(), CvType.CV_8UC3);
 				
 				// Find contours
 				Imgproc.findContours(threshold, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
@@ -94,17 +87,14 @@ public class ScaleLights {
 				Imgproc.drawContours(dilate, contours, -1, new Scalar(255, 255, 255));
 				Imgproc.drawContours(frame, contours, -1, new Scalar(255, 255, 255));
 							
-//				for (int i = 0; i < contours.size(); i++) {
 				if (contours.size() > 0) {
 					mu.add(0, Imgproc.moments(contours.get(0), false));
-			        p = mu.get(0);
-			        int x = (int) (p.get_m10() / p.get_m00());
-			        int y = (int) (p.get_m01() / p.get_m00());
-			        System.out.println("X: " + x + "\nY: " + y);
-			        Imgproc.circle(frame, new Point(x, y), 4, new Scalar(255,49,0,255));
+					p = mu.get(0);
+					int x = (int) (p.get_m10() / p.get_m00());
+					int y = (int) (p.get_m01() / p.get_m00());
+					System.out.println("X: " + x + "\nY: " + y);
+					Imgproc.circle(frame, new Point(x, y), 4, new Scalar(255,49,0,255));
 				}
-			        
-//			    }
 				
 				s = frame.size();
 				
